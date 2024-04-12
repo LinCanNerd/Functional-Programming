@@ -65,24 +65,31 @@ mapBT2 f (Leaf x) = Leaf (f x)
 mapBT2 f (Node2 l r) = Node2 (mapBT2 f l) (mapBT2 f r)
 
 --foldrBT1
-foldrBT1 :: (a -> b -> b -> b) -> b -> BinTree1 a -> b
+foldrBT1 :: (a -> b -> b) -> b -> BinTree1 a -> b
 foldrBT1 _ z Empty = z
-foldrBT1 f z (Node1 x l r) = f x (foldrBT1 f z l) (foldrBT1 f z r)
+foldrBT1 f z (Node1 x l r) = foldrBT1 f (f x (foldrBT1 f z r)) l
 
 --foldrBT2
-foldrBT :: (a -> b -> b) -> b -> BinTree2 a -> b
-foldrBT f z (Leaf x) = f x z
-foldrBT f z (Node2 l r) = foldrBT f (foldrBT f z r) l
+foldrBT2 :: (a -> b -> b) -> b -> BinTree2 a -> b
+foldrBT2 f z (Leaf x) = f x z
+foldrBT2 f z (Node2 l r) = foldrBT2 f (foldrBT2 f z r) l
+
+--foldlBT1
+foldlBT1 :: (b -> a -> a -> b) -> b -> BinTree1 a -> b
+foldlBT1 _ z Empty = z
 
 
 
-
-
-main :: IO ()
 main = do
-    let inputList = [5,4,6,87,11,2,6,55,4]
-    let result = iterativeMergeSort2 inputList
-    putStrLn ("Input List: " ++ show inputList)
-    putStrLn ("Result : " ++ show result)
-
-
+    let myTree :: BinTree1 Int
+        myTree = Node1 10
+                    (Node1 5
+                        (Node1 2 Empty Empty)
+                        (Node1 7 Empty Empty)
+                    )
+                    (Node1 15
+                        (Node1 12 Empty Empty)
+                        (Node1 18 Empty Empty)
+                    )
+    let treeSum = foldrBT1 (+) 0 myTree
+    print treeSum
