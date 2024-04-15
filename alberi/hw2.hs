@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 import Debug.Trace
 import Text.XHtml (height)
 
@@ -130,11 +131,23 @@ foldlT f z (R x ts) = foldl (foldlT f) (f z x) ts
 
 
 --3 Nodi Equilibrati
-sumNodi :: Num a => BinTree1 a -> a
-sumNodi Empty = 0
-sumNodi (Node1 x l r) = x + sumNodi l + sumNodi r
 
-nodiEquilibrati :: BinTree1 Int -> Bool
+nodiEquilibrati :: (Num a, Eq a) => BinTree1 a -> [a]
+nodiEquilibrati tree = snd $ aux tree 0
+  where
+    -- La funzione ausiliaria ritorna una tupla (somma sottoalbero, lista di nodi equilibrati)
+    aux :: (Num a, Eq a) => BinTree1 a -> a -> (a, [a])
+    aux Empty _ = (0, [])
+    aux (Node1 x left right) sumFromRoot = (currentSum, result)
+      where
+        (leftSum, balancedLeft) = aux left (sumFromRoot + x)
+        (rightSum, balancedRight) = aux right (sumFromRoot + x)
+        currentSum = x + leftSum + rightSum
+        -- Controlla se il nodo corrente è equilibrato
+        currentBalanced = [x | sumFromRoot == leftSum + rightSum]
+        result = currentBalanced ++ balancedLeft ++ balancedRight
+
+
 
 
 
@@ -183,15 +196,11 @@ main = do
   let myTree1 :: BinTree1 Int
       myTree1 = Node1 1
                   (Node1 2
-                      (Node1 3 (Node1 3
-                                  (Node1 3 Empty Empty)
-                                  (Node1 3 Empty
-                                    (Node1 3 Empty Empty)))
-                               Empty)
+                      (Node1 3 Empty Empty)
                       (Node1 4 Empty Empty)
                   )
                   (Node1 5
-                      (Node1 6  (Node1 3 Empty Empty) Empty)
+                      (Node1 6 Empty Empty)
                       (Node1 7 Empty Empty)
                   )
 
@@ -206,11 +215,22 @@ main = do
                       (Leaf 3)
                       (Leaf 4)
                   )
+  
+  let myBtree :: BinTree1 Int
+      myBtree = Node1 1
+                  (Node1 2
+                      (Node1 3 Empty Empty)
+                      (Node1 4 Empty Empty)
+                  )
+                  (Node1 5
+                      (Node1 6 Empty Empty)
+                      (Node1 7 Empty Empty)
+                  )
 
   let myT :: Tree Int
       myT = R 4 [ R 2 [R 3 [], R 4 []]
                              ]
 
   let mylist = [1,2,3]
-  let treeSum = countNodesBT2 myTree2
+  let treeSum = nodiEquilibrati myTree1
   print treeSum
