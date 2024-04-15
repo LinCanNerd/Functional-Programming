@@ -1,3 +1,6 @@
+import Debug.Trace
+import Text.XHtml (height)
+
 -- Homework 2, Lin Can  ID 1994375
 
 --Ex1 definire il mergeSort iterativo
@@ -12,7 +15,7 @@ merge (x:xs) (y:ys)
   | otherwise = y : merge (x:xs) ys
 
 singleton :: [a] -> [[a]]
-singleton = map(:[])
+singleton = map (:[])
 
 -- Fonde coppie di liste in una lista di liste
 mergePairs :: Ord a => [[a]] -> [[a]]
@@ -36,7 +39,7 @@ divide = foldr f []
   where
     f x [] = [[x]]
     f x (y:ys) | x < head y = (x:y):ys
-               | otherwise = [x]:y:ys
+                | otherwise = [x]:y:ys
 
 -- questa funzione trae vantaggio se la lista è già ordinata, o almeno parzialmente ordinata
 iterativeMergeSort2 :: Ord a => [a] -> [a]
@@ -49,7 +52,7 @@ iterativeMergeSort2 = head . until singleList mergePairs . divide
 
 
 
---2.1 uso BinTree1 e Bintree2 perchè l'accento mi da errore
+--2.1 uso BinTree1 e Bintree2 perchè l'apostrofo mi da errore
 data BinTree1 a = Node1 a (BinTree1 a) (BinTree1 a) | Empty
 data BinTree2 a = Node2 (BinTree2 a) (BinTree2 a) | Leaf a
 
@@ -65,24 +68,149 @@ mapBT2 f (Leaf x) = Leaf (f x)
 mapBT2 f (Node2 l r) = Node2 (mapBT2 f l) (mapBT2 f r)
 
 --foldrBT1
-foldrBT1 :: (a -> b -> b -> b) -> b -> BinTree1 a -> b
+foldrBT1 :: (a -> b -> b) -> b -> BinTree1 a -> b
 foldrBT1 _ z Empty = z
-foldrBT1 f z (Node1 x l r) = f x (foldrBT1 f z l) (foldrBT1 f z r)
+foldrBT1 f z (Node1 x l r) = foldrBT1 f (f x (foldrBT1 f z r)) l
 
 --foldrBT2
-foldrBT :: (a -> b -> b) -> b -> BinTree2 a -> b
-foldrBT f z (Leaf x) = f x z
-foldrBT f z (Node2 l r) = foldrBT f (foldrBT f z r) l
+foldrBT2 :: (a -> b -> b) -> b -> BinTree2 a -> b
+foldrBT2 f z (Leaf x) = f x z
+foldrBT2 f z (Node2 l r) = foldrBT2 f (foldrBT2 f z r) l
+
+--foldlBT1
+foldlBT1 :: (a -> b -> b) -> b -> BinTree1 a -> b
+foldlBT1 _ z Empty = z
+foldlBT1 f z (Node1 x l r) = foldlBT1 f (f x (foldrBT1 f z l)) r
+
+--foldlBT2
+foldlBT2 :: (a -> b -> b) -> b -> BinTree2 a -> b
+foldlBT2 f z (Leaf x) = f x z
+foldlBT2 f z (Node2 l r) = foldlBT2 f (foldlBT2 f z l) r
+
+
+--2.2
+--numero dei nodi di un albero binario
+countNodesBT1 :: BinTree1 a -> Int
+countNodesBT1 = foldrBT1 (\_ acc -> 1 + acc) 0
+
+countNodesBT2 :: BinTree2 a -> Int
+countNodesBT2 = foldrBT2 (\_ acc -> 1 + acc) 0
+
+--altezza dell'albero binario
+foldrHBT1 :: (a -> b -> b -> b) -> b -> BinTree1 a -> b
+foldrHBT1 _ z Empty = z
+foldrHBT1 f z (Node1 x l r) = f x (foldrHBT1 f z r) (foldrHBT1 f z l)
+
+
+heightBT1 :: BinTree1 a -> Int
+heightBT1 = foldrHBT1 (\_ l r -> 1 + max l r) 0
 
 
 
 
 
-main :: IO ()
+-- massimo sbilanciamento tra i sottoalberi sinistro e destro
+max_sbilanciamentoBT1 :: BinTree1 a -> Int
+max_sbilanciamentoBT1 (Node1 _ l r) = abs (heightBT1 l - heightBT1 r)
+
+
+
+--FACOLTATIVO--
+data Tree a = R a [Tree a]
+
+mapT :: (a -> b) -> Tree a -> Tree b
+mapT f (R x ts) = R (f x) (map (mapT f) ts)
+
+foldrT :: (a -> b -> b) -> b -> Tree a -> b
+foldrT f z (R x ts) = f x (foldr (flip (foldrT f)) z ts)
+
+foldlT :: (b -> a -> b) -> b -> Tree a -> b
+foldlT f z (R x ts) = foldl (foldlT f) (f z x) ts
+--FACOLTATIVO--
+
+
+--3 Nodi Equilibrati
+sumNodi :: Num a => BinTree1 a -> a
+sumNodi Empty = 0
+sumNodi (Node1 x l r) = x + sumNodi l + sumNodi r
+
+nodiEquilibrati :: BinTree1 Int -> Bool
+
+
+
+
+--4 Alberi Binari di Ricerca
+listToABR :: Ord a => [a] -> BinTree1 a
+listToABR = foldr insert Empty
+  where
+    insert :: Ord a => a -> BinTree1 a -> BinTree1 a
+    insert x Empty = Node1 x Empty Empty
+    insert x (Node1 y l r)
+      | x < y     = Node1 y (insert x l) r
+      | otherwise = Node1 y l (insert x r)
+
+
+
+--5 scanr lineare
+--reverse lineare
+myReverse:: [a] -> [a]
+myReverse xs = reverseEff xs [] where
+  reverseEff [] acc = acc
+  reverseEff (x:xs) acc = reverseEff xs (x:acc)
+
+--per una lista di lunghezza n, la complessità di reverse è O(n)
+--e la complessità di myScanl è O(n),
+--quindi la complessità di myScanr è O(n)+O(n)+O(n) = 3*O(n) = O(n)
+myScanr :: (a -> b -> b) -> b -> [a] -> [b]
+myScanr f e xs = myReverse (myScanl f  e (myReverse xs))where
+  myScanl f e [] = [e]
+  myScanl f e (x:xs) = e : myScanl f (f x e) xs
+
+
+instance (Show a) => Show (BinTree1 a) where
+    show :: Show a => BinTree1 a -> String
+    show Empty = "Empty"
+    show (Node1 x l r) = "Node1 (" ++ show x ++ ")\n (" ++ show l ++ ")\n (" ++ show r ++ ")\n"
+
+instance (Show a) => Show (BinTree2 a) where
+    show :: Show a => BinTree2 a -> String
+    show (Leaf x) = "Leaf (" ++ show x ++ ")"
+    show (Node2 l r) = "Node2 (" ++ show l ++ ") (" ++ show r ++ ")"
+
+
+
 main = do
-    let inputList = [5,4,6,87,11,2,6,55,4]
-    let result = iterativeMergeSort2 inputList
-    putStrLn ("Input List: " ++ show inputList)
-    putStrLn ("Result : " ++ show result)
+  let myTree1 :: BinTree1 Int
+      myTree1 = Node1 1
+                  (Node1 2
+                      (Node1 3 (Node1 3
+                                  (Node1 3 Empty Empty)
+                                  (Node1 3 Empty
+                                    (Node1 3 Empty Empty)))
+                               Empty)
+                      (Node1 4 Empty Empty)
+                  )
+                  (Node1 5
+                      (Node1 6  (Node1 3 Empty Empty) Empty)
+                      (Node1 7 Empty Empty)
+                  )
 
 
+  let myTree2 :: BinTree2 Int
+      myTree2 = Node2
+                  (Node2
+                      (Leaf 1)
+                      (Leaf 2)
+                  )
+                  (Node2
+                      (Leaf 3)
+                      (Leaf 4)
+                  )
+
+  let myT :: Tree Int
+      myT = R 4 [ R 2 [R 3 [], R 4 []]
+                             ]
+
+  let mylist = [1,2,3]
+  let treeSum = countNodesBT2 myTree2
+  print treeSum
