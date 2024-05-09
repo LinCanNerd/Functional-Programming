@@ -1,4 +1,5 @@
 import Distribution.Parsec (Parsec(parsec))
+import GHC.Base (Nat)
 --hw3 Can Lin 
 
 --ex1 Insomnia
@@ -20,6 +21,16 @@ numeriFortunati = 1 : sieve [3,5..] 3
     where
     sieve (x:xs) n = x : sieve [y | (i,y) <- zip[n..] xs, i `mod` x /= 0] (n+1)
        
+-----OPTIONAL-----
+
+--1D Ricorsione primitiva
+primRec :: (Int -> a -> a) -> a -> Int -> a
+primRec f g 0 = g
+primRec f g n = f (n-1) (primRec f g (n-1)) 
+
+primRec2 :: (Int -> a -> a) -> a -> Int -> a
+primRec2 f g n = snd $ foldl (\(i, acc) _ -> (i + 1, f i acc)) (0, g) [1..n]
+
 
 
 main :: IO ()
