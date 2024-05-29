@@ -1,9 +1,8 @@
-import Control.Monad (replicateM)
 import qualified Data.Map as Map
 import qualified Data.Set as Set
 import Data.Map (Map)
 import Control.Monad.State
-import Control.Applicative ()
+
 
 
 --Matricola: 1994375 Can Lin
@@ -78,58 +77,63 @@ nodiEquilibrati tree = evalState (aux tree 0) (getRootValue tree)
 
 --ex3 Monadi/Eccezioni
 
-data NatBin = NatBin [Int]
-    deriving (Eq, Ord, Show)
+data NatBin = NatBin [Int] deriving (Eq, Ord, Show)
 
---funzioni per convertire da binari a decimali e viceversa
-intToNatBin :: Int -> NatBin
-intToNatBin 0 = NatBin [0]
-intToNatBin n = NatBin (reverse (toBits n))
+maxBitLength :: Int
+maxBitLength = 8  --Massimo numero di bit
+
+-- Converti numero naturale a numero binario
+intToNatBin :: Int -> Maybe NatBin
+intToNatBin n
+    | n < 0 = Nothing
+    | length bits > maxBitLength = Nothing  -- Check for overflow
+    | otherwise = Just $ NatBin bits
   where
     toBits 0 = []
     toBits m = (m `mod` 2) : toBits (m `div` 2)
+    bits = reverse (toBits n)
 
+-- Converti numero binario a numero naturale
 natBinToInt :: NatBin -> Int
-natBinToInt (NatBin bits) = foldl (\acc bit -> acc * 2 + bit) 0 (reverse bits)
+natBinToInt (NatBin bits) = foldl (\acc bit -> acc * 2 + bit) 0 bits
 
+-- Definizione delle operazioni
+data Operation = Add NatBin NatBin | Sub NatBin NatBin | Mul NatBin NatBin | Div NatBin NatBin | Mod NatBin NatBin
 
---operazioni aritmetiche
-addNatBin :: NatBin -> NatBin -> NatBin
-addNatBin a b = intToNatBin $ natBinToInt a + natBinToInt b
+-- Controllo operationi con errori
+eval :: Operation -> Maybe NatBin
+eval (Add a b) = intToNatBin $ natBinToInt a + natBinToInt b
+eval (Sub a b) = let diff = natBinToInt a - natBinToInt b in if diff < 0 then Nothing else intToNatBin diff
+eval (Mul a b) = intToNatBin $ natBinToInt a * natBinToInt b
+eval (Div _ (NatBin [0])) = Nothing
+eval (Div a b) = 
+    let dividend = natBinToInt a
+        divisor = natBinToInt b
+        result = dividend `div` divisor
+        remainder = dividend `mod` divisor
+    in if remainder == 0 then intToNatBin result else Nothing  --Funziona solo per divisioni esatte, visto che il dominio è naturale
+eval (Mod _ (NatBin [0])) = Nothing
+eval (Mod a b) = intToNatBin $ natBinToInt a `mod` natBinToInt b
 
-mulNatBin :: NatBin -> NatBin -> NatBin
-mulNatBin a b = intToNatBin $ natBinToInt a * natBinToInt b
-
-subNatBin :: NatBin -> NatBin -> Maybe NatBin
-subNatBin a b = let diff = natBinToInt a - natBinToInt b
-                in if diff < 0 then Nothing else Just (intToNatBin diff)
-
-divNatBin :: NatBin -> NatBin -> Maybe NatBin
-divNatBin _ (NatBin [0]) = Nothing -- division by zero
-divNatBin a b = Just (intToNatBin $ natBinToInt a `div` natBinToInt b)
-
-modNatBin :: NatBin -> NatBin -> Maybe NatBin
-modNatBin _ (NatBin [0]) = Nothing -- modulo by zero
-modNatBin a b = Just (intToNatBin $ natBinToInt a `mod` natBinToInt b)
-
-
-
-
-
-
+-- funzione per stampare il risultato di eval
+printEval :: Maybe NatBin -> IO ()
+printEval (Just natBin) = print natBin
+printEval Nothing = putStrLn "Error"
 
 
 
 
-
-
-
--- Example binary tree
+--Esempio tree
 exampleTree :: BinTree Int
 exampleTree = Node 10 (Node 10 (Node 20 Empty Empty) Empty) (Node 10 Empty Empty)
 
--- Main function to run the test
+-- TEST
 main :: IO ()
 main = do
-  let result = nodiEquilibrati exampleTree
-  print result
+    let a = intToNatBin 251
+    let b = intToNatBin (-1)
+    printEval $ do
+        aVal <- a
+        bVal <- b
+        eval (Add aVal bVal)
+    print $ intToNatBin 255
