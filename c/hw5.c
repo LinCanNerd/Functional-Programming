@@ -67,6 +67,35 @@ int remove_duplicates(int *arr, int n) {
     return new_size;
 }
 
+int binomialCoefficient(int n, int k) {
+    // Create a temporary array to store the intermediate results
+    int *C = (int *)malloc((k + 1) * sizeof(int));
+    if (C == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+
+    // Initialize the array with zero
+    for (int i = 0; i <= k; i++) {
+        C[i] = 0;
+    }
+
+    // Base case: C(n, 0) is always 1
+    C[0] = 1;
+
+    // Calculate the binomial coefficient iteratively
+    for (int i = 1; i <= n; i++) {
+        for (int j = (i < k ? i : k); j > 0; j--) {
+            C[j] = C[j] + C[j - 1];
+        }
+    }
+
+    // Store the result before freeing the memory
+    int result = C[k];
+    free(C);
+
+    return result;
+}
 
 typedef struct Node {
     int n, k;
@@ -140,32 +169,18 @@ GraphNode* buildDAG(int n, int k, GraphNode **graph, int *graph_size) {
     return node;
 }
 
-void printTree(Node *root, int level) {
-    if (root == NULL) {
-        return;
-    }
-    for (int i = 0; i < level; i++) {
-        printf("  ");
-    }
-    printf("Node(n=%d, k=%d, value=%d)\n", root->n, root->k, root->value);
-    printTree(root->left, level + 1);
-    printTree(root->right, level + 1);
+
+void printNode(Node *node) {
+    printf("Node(n=%d, k=%d, value=%d)\n", node->n, node->k, node->value);
 }
 
-void printDAG(GraphNode *node, int level) {
-    if (node == NULL) {
-        return;
-    }
-    for (int i = 0; i < level; i++) {
-        printf("  ");
-    }
+void printGraphNode(GraphNode *node) {
     printf("GraphNode(n=%d, k=%d, value=%d)\n", node->n, node->k, node->value);
-    for (int i = 0; i < node->child_count; i++) {
-        printDAG(node->children[i], level + 1);
-    }
 }
 
 
+
+//ESERCIZIO 4 CRIVELLA EULERO
 
 
 typedef struct {
@@ -224,9 +239,8 @@ void printPrimes(Pair* pairs, int n) {
 
 
 int main() {
-    int n = 30;
-    Pair* pairs = eulerSieve(n);
-    printPrimes(pairs, n);
-    free(pairs);
+    char str[100];
+    sprintf(str, "%d", binomialCoefficient(40,30));
+    printf("Binomial Coefficient C(40, 35) = %s\n", str);
     return 0;
 }
