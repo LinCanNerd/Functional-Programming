@@ -1,13 +1,18 @@
 -- Homework 1, Lin Can  ID 1994375
 
-
-
 --1.1   Definire MytakeWhile e MyDropWhile 
+
 myTakeWhile :: (a -> Bool) -> [a] -> [a]
 myTakeWhile p (x:xs) = if p x then x:myTakeWhile p xs else []
 
 myDropWhile :: (a -> Bool) -> [a] -> [a]
 myDropWhile p (x:xs) = if not(p x) then x:myDropWhile p xs else []
+
+
+---------------myDropWhile corretto------------------------------
+myDropWhile2 :: (a -> Bool) -> [a] -> [a]
+myDropWhile2 p (x:xs) = if p x then myDropWhile2 p xs else x:xs
+-------------------------------------------------------------------
 
 
 --1.2   Definire MyRemoveDupsOrd 
@@ -52,6 +57,27 @@ myRemoveDups [] = []
 myRemoveDups xs = map fst (qSortTuples2(myRemoveDupsOrdTuple (qSortTuples1 (zip xs [0..]))))
 
 
+----------------CORREZIONE myRemoveDups------------------------
+
+sortTuplesBy :: Ord a => (t -> a) -> [t] -> [t]
+sortTuplesBy _ [] = []
+sortTuplesBy f (x:xs) =
+    let smallerSorted = sortTuplesBy f [y | y <- xs, f y <= f x]
+        biggerSorted = sortTuplesBy f [y | y <- xs, f y > f x]
+    in smallerSorted ++ [x] ++ biggerSorted
+
+myRemoveDups2 :: Ord b => [b] -> [b]
+myRemoveDups2 xs = map fst . sortTuplesBy snd . removeDupAux2 . sortTuplesBy fst $ zip xs [0..] where
+    removeDupAux2 [] = []
+    removeDupAux2 [x] = [x]
+    removeDupAux2 (x:y:xs)
+        | fst x == fst y = removeDupAux2 (x:xs)
+        | otherwise = x : removeDupAux2 (y:xs)
+
+------------------------------------------------------------
+
+
+
 --2.1 Definire il funzionale zipWith f xs ys senza decomporre liste, ma usando un’espressione che contenga zapp, f ed eventualmente xs e ys
 zapp :: [a -> b] -> [a] -> [b]
 zapp (f:fs)(x:xs)= f x : zapp fs xs
@@ -65,6 +91,10 @@ myzipWith2 :: (a -> b -> c) -> [a] -> [b] -> [c]
 myzipWith2 f [] _ = []
 myzipWith2 f (x:xs) (y:ys) = f x y : myzipWith2 f xs ys
 
+-----CORREZIONE 2.2 ----------------------------
+myzipWith2' :: (a -> b -> c) -> [a] -> [b] -> [c]
+myzipWith2' f xs ys = map (uncurry f) (zip xs ys)
+-------------------------------------------------
 
 --2.3 map con foldr e foldl
 myMapR :: (a -> b) -> [a] -> [b]
@@ -82,23 +112,39 @@ mentre map è una funzione che opera su liste e restituisce una lista.
 
 --3.1
 myPrefissi :: [a] -> [[a]]
-myPrefissi [] = [[]]
+myPrefissi [] = []
 myPrefissi (x:xs) = [] : map (x:) (myPrefissi xs) 
 
+--CORREZIONE 3.1-----------------------------
+myPrefissi' :: [a] -> [[a]]
+myPrefissi' [] = []
+myPrefissi' xs = xs : myPrefissi' (init xs)
+---------------------------------------------
 
 --3.2 
 mySuffissi :: [a] -> [[a]]
-mySuffissi [] = [[]]
+mySuffissi [] = []
 mySuffissi xs = xs : mySuffissi (tail xs)
 
+
+
 mySegmenti :: [a] -> [[a]]
-mySegmenti xs = mySuffissi xs ++ myPrefissi xs
+mySegmenti xs = mySuffissi xs ++ myPrefissi' xs
 
 mySegSomma :: (Num a, Eq a) => [a] -> a -> [[a]]
 mySegSomma [] _ = []
-mySegSomma xs n = ys where
+mySegSomma xs n = zs where
     ys = mySegmenti xs
     zs = [y | y <- ys , sum y == n]
+
+----------------CORREZIONE 3.2------------------------
+mySegmenti' :: [a] -> [[a]]
+mySegmenti' xs = concatMap myPrefissi' (mySuffissi xs)
+
+mySegSomma' :: (Num a, Eq a) => [a] -> a -> [[a]]
+mySegSomma' xs n = filter (\x -> sum x == n) (mySegmenti' xs)
+
+
 
 --3.3
 --funzione per prendere tutte le sottoliste di una lista
@@ -119,10 +165,10 @@ sublSommaS xs n = zs where
 
 main :: IO ()
 main = do
-    let inputList = [1,2,3,2,4]
-    let list2 = [1,2,3,4,5,6,7,8,9,10]
+    let inputList = [1,3,2,3,4,5]
+    let list2 = [5,2,1,2,5,7,2,1,2,7]
     let word = "qqqqaaaa"
-    let result = myDropWhile (>3) inputList
+    let result = myDropWhile2 (<3) inputList 
     putStrLn ("Input List: " ++ show inputList)
     putStrLn ("Result after removing duplicates: " ++ show result)
 

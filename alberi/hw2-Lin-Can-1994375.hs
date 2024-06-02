@@ -1,4 +1,4 @@
-import Debug.Trace
+
 -- Homework 2, Lin Can  ID 1994375
 
 --Ex1 definire il mergeSort iterativo
@@ -100,7 +100,6 @@ foldrHBT1 :: (a -> b -> b -> b) -> b -> BinTree1 a -> b
 foldrHBT1 _ z Empty = z
 foldrHBT1 f z (Node1 x l r) = f x (foldrHBT1 f z r) (foldrHBT1 f z l)
 
-
 heightBT1 :: BinTree1 a -> Int
 heightBT1 = foldrHBT1 (\_ l r -> 1 + max l r) 0
 
@@ -182,19 +181,7 @@ myScanr f e xs = myReverse (myScanl f  e (myReverse xs))where
 
 
 --TEST--
-instance (Show a) => Show (BinTree1 a) where
-    show :: Show a => BinTree1 a -> String
-    show Empty = "Empty"
-    show (Node1 x l r) = "Node1 (" ++ show x ++ ") (" ++ show l ++ ") (" ++ show r ++ ")"
 
-instance (Show a) => Show (BinTree2 a) where
-    show :: Show a => BinTree2 a -> String
-    show (Leaf x) = "Leaf (" ++ show x ++ ")"
-    show (Node2 l r) = "Node2 (" ++ show l ++ ") (" ++ show r ++ ")"
-
-instance (Show a ) => Show (Tree a) where
-    show :: Show a => Tree a -> String
-    show (R x ts) = "R " ++ show x ++ "  [" ++ show ts ++ "]"
 
 main = do
   let myTree1 :: BinTree1 Int
