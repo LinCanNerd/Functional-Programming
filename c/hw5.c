@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+//gcc -o hw5 hw5.c
 
 //esercizio 1
 void checkEdian(){
@@ -216,32 +217,35 @@ Pair* initializeVector(int n) {
 
 //Algoritmo per trovare i numeri primi
 Pair* eulerSieve(int n) {
-    //inizializzo il vettore
+    //Inizializzo il vettore
     Pair* pairs = initializeVector(n);
-    //setto 0 e 1 come non primi
-    pairs[0].succ = pairs[0].prec = 0; 
-    pairs[1].succ = pairs[1].prec = 0; 
+    //Setto 0 e 1 come non primi
+    pairs[0].succ = pairs[0].prec = 0;
+    pairs[1].succ = pairs[1].prec = 0;
 
-    //inizio il loop da 2, se il numero è primo setto tutti i suoi multipli come non primi
+    //Inizio il loop da 2, se il numero è primo setto tutti i suoi multipli come non primi
     for (int i = 2; i <= n; ++i) {
-        if (pairs[i].succ != 0) { 
+        if (pairs[i].succ != 0) {
             for (int j = 2 * i; j <= n; j += i) {
-                pairs[j].succ = 0; 
+                pairs[j].succ = 0;
+                pairs[j].prec = 0; 
             }
         }
     }
 
-    //calcolo il gap dei prev
-    int prev = -1;
-    for (int i = 0; i <= n; ++i) {
-        if (pairs[i].succ != 0) {
-            if (prev != -1) {
-                pairs[prev].succ = i - prev;
-                pairs[i].prec = i - prev;
-            }
+    //Calcolo il gap dei succ e prec
+    pairs[2].succ = 1; //Imposta direttamente succ di 2
+    pairs[2].prec = 0; //Imposta direttamente prec di 2
+
+    int prev = 2;
+    for (int i = 3; i <= n; ++i) {
+        if (pairs[i].succ != 0) { //Se è primo
+            pairs[prev].succ = i - prev; //Calcola gap succ
+            pairs[i].prec = i - prev;    //Calcola gap prec
             prev = i;
         }
     }
+
     return pairs;
 }
 
@@ -255,6 +259,24 @@ void printPrimes(Pair* pairs, int n) {
     printf("\n");
 }
 
+//funzione per controllare se i gap siano corretti
+void printSucPrec(Pair* pairs, int n) {
+    printf("Num: ");
+    for (int i = 2; i <= n; ++i) {
+            printf("%d ", i);
+    }
+    printf("\n");
+    printf("Succ: ");
+    for (int i = 2; i <= n; ++i) {
+            printf("%d ", pairs[i].succ);
+    }
+    printf("\n");
+    printf("Prev: ");
+    for (int i = 2; i <= n; ++i) {
+            printf("%d ", pairs[i].prec);
+    }
+    printf("\n");
+}
 
 int main() {
     checkEdian();
@@ -273,7 +295,7 @@ int main() {
     }
     printf("\n");
 
-    printPrimes(eulerSieve(10000), 10000);
+    printSucPrec(eulerSieve(24), 24);
 
     return 0;
 }
