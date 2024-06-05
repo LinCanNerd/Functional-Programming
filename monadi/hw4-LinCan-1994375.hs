@@ -86,7 +86,7 @@ maxBitLength = 8  --Massimo numero di bit
 intToNatBin :: Int -> Maybe NatBin
 intToNatBin n
     | n < 0 = Nothing
-    | length bits > maxBitLength = Nothing  -- Check for overflow
+    | length bits > maxBitLength = Nothing  -- Controllo del overflow
     | otherwise = Just $ NatBin bits
   where
     toBits 0 = []
