@@ -4,9 +4,12 @@ import Data.Map (Map)
 import Control.Monad.State
 
 
+<<<<<<< Updated upstream:monadi/hw4-LinCan-1994375.hs
 
 --Matricola: 1994375 Can Lin
 
+=======
+>>>>>>> Stashed changes:monadi/hw4.hs
 --ex1 Input/Output
 
 charCount :: IO ()

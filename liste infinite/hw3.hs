@@ -1,4 +1,7 @@
+<<<<<<< Updated upstream:liste infinite/hw3-LinCan-1994375.hs
 --hw3 Can Lin 
+=======
+>>>>>>> Stashed changes:liste infinite/hw3.hs
 
 --ex1 Insomnia
 
@@ -23,5 +26,10 @@ numeriFortunati = 1 : sieve [3,5..] 3
 
 main :: IO ()
 --main = putStrLn $ take 5 insonnia
+<<<<<<< Updated upstream:liste infinite/hw3-LinCan-1994375.hs
 --main = print $ take 10 tartaglia
 main = print $ take 10 numeriFortunati
+=======
+main = print $ take 10 tartaglia
+--main = print $ take 10 numeriFortunati
+>>>>>>> Stashed changes:liste infinite/hw3.hs
