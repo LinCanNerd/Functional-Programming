@@ -144,7 +144,7 @@ mySegmenti' xs = concatMap myPrefissi' (mySuffissi xs)
 mySegSomma' :: (Num a, Eq a) => [a] -> a -> [[a]]
 mySegSomma' xs n = filter (\x -> sum x == n) (mySegmenti' xs)
 
-
+--------------------------------------------------------------
 
 --3.3
 --funzione per prendere tutte le sottoliste di una lista
